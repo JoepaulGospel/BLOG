@@ -1,27 +1,25 @@
 /* ============================================
    SUPPLEMENT BLOG — AI POST GENERATOR
    File: generator.js
-   Uses Groq API for text + Gemini for cover images
+   Uses Groq API for text + Cloudinary for cover images
    ============================================ */
 
 const Groq = require("groq-sdk");
-const fs = require("fs");
-const path = require("path");
-const https = require("https");
+const cloudinary = require("cloudinary").v2;
 const dotenv = require("dotenv");
-const db = require("./db");
+const { run } = require("./db");
 
 dotenv.config();
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// Ensure images directory exists
-const imagesDir = path.join(__dirname, "assets", "images");
-if (!fs.existsSync(imagesDir)) {
-  fs.mkdirSync(imagesDir, { recursive: true });
-}
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-// ── FETCH COVER IMAGE FROM PEXELS ──
+// -- FETCH COVER IMAGE FROM PEXELS & UPLOAD TO CLOUDINARY --
 async function generateCoverImage(topic, category) {
   try {
     const query = encodeURIComponent(`${topic} supplement health`);
@@ -51,33 +49,26 @@ async function generateCoverImage(topic, category) {
     const photo = data.photos[Math.floor(Math.random() * data.photos.length)];
     const imageUrl = photo.src.large2x;
 
-    // Download image
-    const fileName = `post-${Date.now()}.jpg`;
-    const filePath = path.join(imagesDir, fileName);
-
-    await new Promise((resolve, reject) => {
-      https.get(imageUrl, (res) => {
-        const stream = fs.createWriteStream(filePath);
-        res.pipe(stream);
-        stream.on("finish", () => { stream.close(); resolve(); });
-        stream.on("error", reject);
-      }).on("error", reject);
+    // Upload directly from Pexels URL to Cloudinary
+    const uploadResult = await cloudinary.uploader.upload(imageUrl, {
+      folder: "supplifeed",
+      transformation: [{ width: 1200, height: 630, crop: "fill" }],
     });
 
-    console.log(`🖼️ Cover image saved: ${fileName} (Pexels: ${photo.photographer})`);
-    return `assets/images/${fileName}`;
+    console.log(`🖼️ Cover image uploaded to Cloudinary (Pexels: ${photo.photographer})`);
+    return uploadResult.secure_url;
   } catch (err) {
-    console.error("⚠️ Image fetch failed:", err.message);
+    console.error("⚠️ Image fetch/upload failed:", err.message);
     return null;
   }
 }
 
-// ── GENERATE A FULL BLOG POST ──
+// -- GENERATE A FULL BLOG POST --
 async function generatePost(topic, category) {
   const prompt = buildPrompt(topic, category);
 
   // Generate text and image in parallel
-  const [textResponse, imagePath] = await Promise.all([
+  const [textResponse, imageUrl] = await Promise.all([
     groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
@@ -107,19 +98,18 @@ async function generatePost(topic, category) {
   const readTime = `${Math.max(3, Math.ceil(wordCount / 200))} min read`;
 
   // Save to database
-  const stmt = db.prepare(`
-    INSERT INTO posts (title, excerpt, content, category, date, readTime, image)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `);
-
-  const result = stmt.run(
-    topic,
-    excerpt,
-    content,
-    category,
-    new Date().toISOString().split("T")[0],
-    readTime,
-    imagePath
+  const result = await run(
+    `INSERT INTO posts (title, excerpt, content, category, date, readTime, image)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [
+      topic,
+      excerpt,
+      content,
+      category,
+      new Date().toISOString().split("T")[0],
+      readTime,
+      imageUrl
+    ]
   );
 
   const post = { id: result.lastInsertRowid, title: topic, category };
@@ -128,7 +118,7 @@ async function generatePost(topic, category) {
   return post;
 }
 
-// ── BUILD PROMPT BASED ON CATEGORY ──
+// -- BUILD PROMPT BASED ON CATEGORY --
 function buildPrompt(topic, category) {
   const prompts = {
     reviews: `Write a detailed supplement review article about "${topic}". Include:

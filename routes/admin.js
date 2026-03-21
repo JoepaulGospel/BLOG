@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db");
+const { run } = require("../db");
 const { runJob } = require("../scheduler");
 
 // GET /api/admin/generate — trigger auto post generation (used by external cron)
@@ -14,28 +14,35 @@ router.get("/generate", async (req, res) => {
 });
 
 // POST /api/admin/posts — create a new post
-router.post("/posts", (req, res) => {
-  const { title, excerpt, content, category, date, readTime, image } = req.body;
+router.post("/posts", async (req, res) => {
+  try {
+    const { title, excerpt, content, category, date, readTime, image } = req.body;
 
-  const stmt = db.prepare(`
-    INSERT INTO posts (title, excerpt, content, category, date, readTime, image)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `);
+    const result = await run(
+      `INSERT INTO posts (title, excerpt, content, category, date, readTime, image)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        title, excerpt, content, category,
+        date || new Date().toISOString().split("T")[0],
+        readTime || "5 min read",
+        image || null
+      ]
+    );
 
-  const result = stmt.run(
-    title, excerpt, content, category,
-    date || new Date().toISOString().split("T")[0],
-    readTime || "5 min read",
-    image || null
-  );
-
-  res.json({ id: result.lastInsertRowid, message: "Post created" });
+    res.json({ id: result.lastInsertRowid, message: "Post created" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // DELETE /api/admin/posts/:id
-router.delete("/posts/:id", (req, res) => {
-  db.prepare("DELETE FROM posts WHERE id = ?").run(req.params.id);
-  res.json({ message: "Post deleted" });
+router.delete("/posts/:id", async (req, res) => {
+  try {
+    await run("DELETE FROM posts WHERE id = ?", [req.params.id]);
+    res.json({ message: "Post deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

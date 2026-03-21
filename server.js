@@ -3,26 +3,38 @@
    File: server.js
    ============================================ */
 
-// ── 1. IMPORTS ──
+// -- 1. IMPORTS --
 const express = require("express");
 const cors    = require("cors");
-const path    = require("path");
 const dotenv  = require("dotenv");
 
 dotenv.config();
 
+const { initDb } = require("./db");
+
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// ── 2. MIDDLEWARE ──
-app.use(cors());
+// -- 2. MIDDLEWARE --
+const allowedOrigins = [
+  "http://localhost:8888",
+  "http://localhost:3000",
+  process.env.NETLIFY_URL,
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  }
+}));
+
 app.use(express.json());
 
-// ── 3. SERVE FRONTEND HTML FILES ──
-// This serves your index.html, post.html etc directly
-app.use(express.static(path.join(__dirname)));
-
-// ── 4. ROUTES ──
+// -- 3. ROUTES --
 try {
   const postsRoute = require("./routes/posts");
   const adminRoute = require("./routes/admin");
@@ -33,17 +45,20 @@ try {
   console.error("⚠️ Routes failed to load:", err.message);
 }
 
-// ── 5. HEALTH CHECK ──
+// -- 4. HEALTH CHECK --
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", message: "SuppliFeed server is running." });
+  res.json({ status: "ok", message: "SuppliFeed API is running." });
 });
 
-// ── 6. CATCH ALL — serve index.html for any unknown route ──
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-// ── 7. START SERVER ──
-app.listen(PORT, () => {
-  console.log(`✅ SuppliFeed running on port ${PORT}`);
-});
+// -- 5. START SERVER --
+(async () => {
+  try {
+    await initDb();
+    app.listen(PORT, () => {
+      console.log(`✅ SuppliFeed API running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("❌ Failed to start server:", err);
+    process.exit(1);
+  }
+})();
