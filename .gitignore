@@ -1,0 +1,6 @@
+node_modules/
+.env
+supplifeed.db
+supplifeed.db-shm
+supplifeed.db-wal
+assets/images/

@@ -88,19 +88,16 @@ function getRandomCategory() {
 async function runJob() {
   console.log("⏰ Scheduler triggered — generating new post...");
 
-  try {
-    const category = getRandomCategory();
-    const topic    = getRandomTopic(category);
+  const category = getRandomCategory();
+  const topic    = getRandomTopic(category);
 
-    console.log(`📌 Topic: "${topic}" | Category: ${category}`);
+  console.log(`📌 Topic: "${topic}" | Category: ${category}`);
 
-    const post = await generator.generatePost(topic, category);
+  const post = await generator.generatePost(topic, category);
 
-    console.log(`✅ Post published: "${post.title}" (ID: ${post.id})`);
+  console.log(`✅ Post published: "${post.title}" (ID: ${post.id})`);
 
-  } catch (err) {
-    console.error("❌ Scheduler error:", err.message);
-  }
+  return post;
 }
 
 
@@ -112,12 +109,6 @@ cron.schedule("0 8 * * *", () => {
 });
 
 console.log("✅ Scheduler is running — new post will generate every day at 8:00 AM");
-
-
-// ── 7. ALSO RUN ONCE IMMEDIATELY ON START ──
-// This generates one post right away when you start the scheduler
-// Remove this line if you don't want that
-runJob();
 
 
 module.exports = { runJob };
