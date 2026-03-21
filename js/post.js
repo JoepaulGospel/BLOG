@@ -5,7 +5,7 @@
 
 
 // ── 1. CONFIG ──
-const API_URL = "http://localhost:3000"; // Change to live URL when deployed
+const API_URL = "";
 
 
 // ── 2. ON PAGE LOAD ──

@@ -5,7 +5,7 @@
 
 
 // ── 1. CONFIG ──
-const API_URL = "http://localhost:3000"; // Change this to your live server URL when deployed
+const API_URL = "";
 const POSTS_PER_PAGE = 6;
 
 let currentPage = 1;
