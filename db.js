@@ -36,7 +36,7 @@ async function queryOne(sql, args = []) {
 
 async function run(sql, args = []) {
   const result = await db.execute({ sql, args });
-  return { lastInsertRowid: result.lastInsertRowid };
+  return { lastInsertRowid: Number(result.lastInsertRowid) };
 }
 
 module.exports = { initDb, queryAll, queryOne, run };
