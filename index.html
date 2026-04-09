@@ -3,134 +3,144 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="Your #1 source for supplement reviews, ingredient breakdowns, health tips, and research news." />
+  <meta name="description" content="Expert-level content on reviews, ingredients, fitness tips, and the latest supplement research — updated daily." />
   <title>SuppliFeed — Supplement Blog</title>
-
-  <!-- Stylesheet -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
 
-  <!-- ══════════════════════════════
-       HEADER & NAVBAR
-  ══════════════════════════════ -->
+  <!-- HEADER -->
   <header>
     <div class="nav-container">
       <div class="logo">Suppli<span>Feed</span></div>
-      <nav>
+      <nav id="main-nav">
         <a href="index.html">Home</a>
         <a href="category.html?cat=reviews">Reviews</a>
         <a href="category.html?cat=ingredients">Ingredients</a>
         <a href="category.html?cat=tips">Tips</a>
         <a href="category.html?cat=research">Research</a>
         <a href="about.html">About</a>
+        <a href="category.html" class="nav-cta">Browse All</a>
       </nav>
+      <div class="nav-toggle" id="nav-toggle" onclick="toggleNav()">
+        <span></span><span></span><span></span>
+      </div>
     </div>
   </header>
 
 
-  <!-- ══════════════════════════════
-       HERO SECTION
-  ══════════════════════════════ -->
+  <!-- HERO -->
   <section class="hero">
-    <h1>The Smarter Way to Learn About <span>Supplements</span></h1>
-    <p>
-      Expert-level content on reviews, ingredients, fitness tips,
-      and the latest supplement research — updated daily.
-    </p>
-    <a href="category.html" class="btn">Browse All Posts</a>
+    <div class="hero-inner">
+      <div class="hero-tag">🌿 Updated Daily</div>
+      <h1>The Smarter Way<br>to Learn About<br><span>Supplements</span></h1>
+      <p>Expert-level content on reviews, ingredients, fitness tips, and the latest supplement research — updated daily.</p>
+      <div class="hero-btns">
+        <a href="category.html" class="btn">Browse All Posts</a>
+        <a href="about.html" class="btn btn-ghost">Learn More</a>
+      </div>
+    </div>
   </section>
 
 
-  <!-- ══════════════════════════════
-       CATEGORY FILTER BADGES
-  ══════════════════════════════ -->
-  <div class="section">
+  <!-- TOPIC QUESTIONS STRIP -->
+  <div class="topics-strip">
+    <div class="topics-strip-inner">
+      <h2>What are you looking for?</h2>
+      <div class="topics-list">
+        <a href="category.html?question=Best+supplements+for+weight+loss" class="topic-pill">Best supplements for weight loss</a>
+        <a href="category.html?question=Best+supplements+for+men" class="topic-pill">Best supplements for men</a>
+        <a href="category.html?question=Best+supplements+for+hair+growth" class="topic-pill">Best supplements for hair growth</a>
+        <a href="category.html?question=Best+supplements+for+perimenopause" class="topic-pill">Best supplements for perimenopause</a>
+        <a href="category.html?question=Best+supplements+for+anxiety" class="topic-pill">Best supplements for anxiety</a>
+        <a href="category.html?question=Best+supplements+for+inflammation" class="topic-pill">Best supplements for inflammation</a>
+        <a href="category.html?question=Best+supplements+for+erections" class="topic-pill">Best supplements for erections</a>
+        <a href="category.html?question=Best+supplements+for+brain+health" class="topic-pill">Best supplements for brain health</a>
+        <a href="category.html?question=Best+supplements+to+reduce+cortisol" class="topic-pill">Best supplements to reduce cortisol</a>
+        <a href="category.html?question=Best+supplements+for+gut+health" class="topic-pill">Best supplements for gut health</a>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- CATEGORY FILTER -->
+  <div class="section" style="margin-bottom:0;">
     <div id="category-filters">
-      <span class="badge badge-review"    onclick="filterPosts('reviews')">🧪 Reviews</span>
-      <span class="badge badge-ingredient"onclick="filterPosts('ingredients')">🔬 Ingredients</span>
-      <span class="badge badge-tip"       onclick="filterPosts('tips')">💪 Health Tips</span>
-      <span class="badge badge-research"  onclick="filterPosts('research')">📰 Research</span>
-      <span class="badge"                 onclick="filterPosts('all')"
-            style="background:#eee;color:#555;">🔄 All</span>
+      <span class="badge badge-review"     onclick="filterPosts('reviews')">🧪 Reviews</span>
+      <span class="badge badge-ingredient" onclick="filterPosts('ingredients')">🔬 Ingredients</span>
+      <span class="badge badge-tip"        onclick="filterPosts('tips')">💪 Health Tips</span>
+      <span class="badge badge-research"   onclick="filterPosts('research')">📰 Research</span>
+      <span class="badge" onclick="filterPosts('all')" style="background:#e5e7eb;color:#555;">🔄 All</span>
     </div>
   </div>
 
 
-  <!-- ══════════════════════════════
-       FEATURED POST
-  ══════════════════════════════ -->
+  <!-- FEATURED POST -->
   <div class="section">
-    <h2 class="section-title">Featured Post</h2>
-
-    <!-- This block is filled dynamically by main.js -->
-    <div id="featured-post">
-      <!-- Featured post will load here -->
+    <div class="section-header">
+      <h2 class="section-title">Featured Post</h2>
     </div>
+    <div id="featured-post"></div>
   </div>
 
 
-  <!-- ══════════════════════════════
-       LATEST POSTS GRID
-  ══════════════════════════════ -->
+  <!-- LATEST POSTS -->
   <div class="section">
-    <h2 class="section-title">Latest Posts</h2>
-
-    <!-- This grid is filled dynamically by main.js -->
-    <div class="cards-grid" id="posts-grid">
-      <!-- Post cards will load here -->
+    <div class="section-header">
+      <h2 class="section-title">Latest Posts</h2>
+      <a href="category.html" class="section-link">View all →</a>
     </div>
-
-    <!-- Loading state -->
-    <p id="loading-msg" style="text-align:center; color:#888; margin-top:20px;">
-      Loading posts...
-    </p>
-
-    <!-- No posts state -->
-    <p id="no-posts-msg" style="text-align:center;color:#888;display:none;">
-      No posts found in this category.
-    </p>
+    <div class="cards-grid" id="posts-grid"></div>
+    <p id="loading-msg" style="text-align:center;color:#9ca3af;margin-top:28px;font-size:0.9rem;">Loading posts...</p>
+    <p id="no-posts-msg" style="text-align:center;color:#9ca3af;display:none;">No posts found in this category.</p>
   </div>
 
 
-  <!-- ══════════════════════════════
-       LOAD MORE BUTTON
-  ══════════════════════════════ -->
-  <div style="text-align:center; margin-bottom:60px;">
-    <button class="btn" id="load-more-btn" onclick="loadMore()" style="display:none;">
+  <!-- LOAD MORE -->
+  <div style="text-align:center;margin-bottom:80px;">
+    <button class="btn btn-outline" id="load-more-btn" onclick="loadMore()" style="display:none;">
       Load More Posts
     </button>
   </div>
 
 
-  <!-- ══════════════════════════════
-       FOOTER
-  ══════════════════════════════ -->
+  <!-- FOOTER -->
   <footer>
-    <div class="footer-logo">Suppli<span style="color:#fff">Feed</span></div>
-    <p>Your daily source for supplement knowledge.</p>
-
-    <div class="footer-links">
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="category.html?cat=reviews">Reviews</a>
-      <a href="category.html?cat=research">Research</a>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">Suppli<span>Feed</span></div>
+        <p>Your daily source for supplement knowledge.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Categories</h4>
+        <a href="category.html?cat=reviews">Reviews</a>
+        <a href="category.html?cat=ingredients">Ingredients</a>
+        <a href="category.html?cat=tips">Health Tips</a>
+        <a href="category.html?cat=research">Research</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+      </div>
     </div>
-
-    <p style="margin-top:16px; font-size:0.78rem;">
-      ⚠️ Disclaimer: Content on this site is for informational purposes only.
-      Always consult a healthcare professional before taking supplements.
-    </p>
-
-    <p style="margin-top:12px; font-size:0.78rem;">
-      © 2026 SuppliFeed. All rights reserved.
-    </p>
+    <div class="footer-disclaimer">
+      ⚠️ Disclaimer: Content on SuppliFeed is for informational purposes only and should not be considered medical advice. Always consult a qualified healthcare professional before starting any supplement regimen.
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 SuppliFeed. All rights reserved.</span>
+    </div>
   </footer>
 
-
-  <!-- JavaScript -->
   <script src="js/main.js"></script>
+  <script>
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
 
 </body>
 </html>
